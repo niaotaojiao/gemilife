@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "789505071184",
+    "project_id": "gemilife-1ce43",
+    "storage_bucket": "gemilife-1ce43.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:789505071184:android:939a3c28178fdcb791d955",
+        "android_client_info": {
+          "package_name": "com.example.gemilife"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi9cCuZmIefcbJ5g1PB3Zj8zOmGsNe9FI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
