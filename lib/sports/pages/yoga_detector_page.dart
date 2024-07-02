@@ -106,6 +106,46 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
     );
   }
 
+  Widget poseInfo() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.7),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "poseName",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "poseDescription",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +156,7 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
         initialCameraLensDirection: _cameraLensDirection,
         onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
       ),
+      poseInfo(),
       Positioned(
           bottom: 0.0, child: percent < 1.0 ? countText() : completeText()),
     ]));
@@ -143,7 +184,6 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
         );
         _customPaint = CustomPaint(painter: painter);
       } else {
-        // TODO: set _customPaint to draw landmarks on top of image
         _customPaint = null;
       }
     }
