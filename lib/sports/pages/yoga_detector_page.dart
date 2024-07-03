@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gemilife/gemini_service.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:gemilife/sports/pages/camera_page.dart';
 import 'package:gemilife/sports/services/pose_functions.dart';
@@ -20,19 +23,28 @@ class YogaDetectorPage extends StatefulWidget {
 class _YogaDetectorPageState extends State<YogaDetectorPage> {
   final PoseDetector _poseDetector =
       PoseDetector(options: PoseDetectorOptions());
+  final GeminiService _geminiService = GeminiService();
   bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;
   var _cameraLensDirection = CameraLensDirection.back;
 
   int frameCounter = 0;
+  int feedbackfreq = 30;
   double percent = 0.0;
+  String poseFeedback = "Please start!";
 
   @override
   void dispose() async {
     _canProcess = false;
     _poseDetector.close();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _geminiService.initialize();
   }
 
   double _getPercent() {
@@ -125,7 +137,7 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "poseName",
+              widget.name,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -134,7 +146,7 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
             ),
             SizedBox(height: 8),
             Text(
-              "poseDescription",
+              poseFeedback,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -144,22 +156,6 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(children: [
-      CameraView(
-        customPaint: _customPaint,
-        onImage: _processImage,
-        initialCameraLensDirection: _cameraLensDirection,
-        onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
-      ),
-      poseInfo(),
-      Positioned(
-          bottom: 0.0, child: percent < 1.0 ? countText() : completeText()),
-    ]));
   }
 
   Future<void> _processImage(InputImage inputImage) async {
@@ -183,6 +179,14 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
           poseState,
         );
         _customPaint = CustomPaint(painter: painter);
+
+        if (feedbackfreq == 0) {
+          poseFeedback = await _geminiService.analyzePose(inputImage.bytes!);
+          feedbackfreq = 30;
+        } else {
+          print(feedbackfreq);
+          feedbackfreq--;
+        }
       } else {
         _customPaint = null;
       }
@@ -191,5 +195,21 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Stack(children: [
+      CameraView(
+        customPaint: _customPaint,
+        onImage: _processImage,
+        initialCameraLensDirection: _cameraLensDirection,
+        onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
+      ),
+      poseInfo(),
+      Positioned(
+          bottom: 0.0, child: percent < 1.0 ? countText() : completeText()),
+    ]));
   }
 }
