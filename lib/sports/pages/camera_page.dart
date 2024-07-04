@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:gemilife/gemini_service.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView(
@@ -27,21 +29,38 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> {
+  // Camera-related variables
   static List<CameraDescription> _cameras = [];
   CameraController? _controller;
   int _cameraIndex = -1;
+  bool _changingCameraLens = false;
+
+  // Zoom and exposure variables
   double _currentZoomLevel = 1.0;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _minAvailableExposureOffset = 0.0;
   double _maxAvailableExposureOffset = 0.0;
   double _currentExposureOffset = 0.0;
-  bool _changingCameraLens = false;
+
+  // Pose analysis variables
+  final GeminiService _geminiService = GeminiService();
+  String poseFeedback = "Please start!";
+  bool _isBusy = false;
+
+  @override
+  void dispose() {
+    _stopLiveFeed();
+    _startTimer();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _initialize();
+    _startTimer();
+    _geminiService.initialize();
   }
 
   void _initialize() async {
@@ -60,39 +79,36 @@ class _CameraViewState extends State<CameraView> {
   }
 
   @override
-  void dispose() {
-    _stopLiveFeed();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return _liveFeedBody();
   }
 
   Widget _liveFeedBody() {
-    if (_cameras.isEmpty) return Container();
-    if (_controller == null) return Container();
-    if (_controller?.value.isInitialized == false) return Container();
+    if (_cameras.isEmpty ||
+        _controller == null ||
+        _controller?.value.isInitialized == false) {
+      return Container();
+    }
+
     return Container(
       color: Colors.black,
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          Center(
-            child: _changingCameraLens
-                ? const Center(
-                    child: Text('Changing camera lens'),
-                  )
-                : CameraPreview(
-                    _controller!,
-                    child: widget.customPaint,
-                  ),
-          ),
+          _cameraPreviewWidget(),
           _backButton(),
           _switchLiveCameraToggle(),
+          _poseInfoWidget(),
         ],
       ),
+    );
+  }
+
+  Widget _cameraPreviewWidget() {
+    return Center(
+      child: _changingCameraLens
+          ? const Text('Changing camera lens...')
+          : CameraPreview(_controller!, child: widget.customPaint),
     );
   }
 
@@ -133,6 +149,75 @@ class _CameraViewState extends State<CameraView> {
           ),
         ),
       );
+
+  Widget _poseInfoWidget() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.7),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Text(
+              poseFeedback,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _captureAndAnalyze() async {
+    if (_isBusy) return;
+
+    setState(() {
+      _isBusy = true;
+    });
+
+    try {
+      final image = await _controller!.takePicture();
+      final imageBytes = await image.readAsBytes();
+
+      final feedback =
+          await _geminiService.analyzePose(Uint8List.fromList(imageBytes));
+      setState(() {
+        poseFeedback = feedback;
+      });
+      print('姿勢分析: $feedback');
+    } catch (e) {
+      print('拍攝圖像時出錯: $e');
+      setState(() {
+        poseFeedback = "An error occurred during analysis, please try again";
+      });
+    } finally {
+      setState(() {
+        _isBusy = false;
+      });
+    }
+  }
+
+  void _startTimer() {
+    Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (!_isBusy) {
+        _captureAndAnalyze();
+      }
+    });
+  }
 
   Future _startLiveFeed() async {
     final camera = _cameras[_cameraIndex];

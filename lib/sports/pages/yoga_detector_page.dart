@@ -1,11 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gemilife/gemini_service.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:gemilife/sports/pages/camera_page.dart';
 import 'package:gemilife/sports/services/pose_functions.dart';
@@ -23,7 +20,6 @@ class YogaDetectorPage extends StatefulWidget {
 class _YogaDetectorPageState extends State<YogaDetectorPage> {
   final PoseDetector _poseDetector =
       PoseDetector(options: PoseDetectorOptions());
-  final GeminiService _geminiService = GeminiService();
   bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;
@@ -44,7 +40,6 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
   @override
   void initState() {
     super.initState();
-    _geminiService.initialize();
   }
 
   double _getPercent() {
@@ -118,46 +113,6 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
     );
   }
 
-  Widget poseInfo() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              widget.name,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              poseFeedback,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _processImage(InputImage inputImage) async {
     if (!_canProcess) return;
     if (_isBusy) return;
@@ -179,14 +134,6 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
           poseState,
         );
         _customPaint = CustomPaint(painter: painter);
-
-        if (feedbackfreq == 0) {
-          poseFeedback = await _geminiService.analyzePose(inputImage.bytes!);
-          feedbackfreq = 30;
-        } else {
-          print(feedbackfreq);
-          feedbackfreq--;
-        }
       } else {
         _customPaint = null;
       }
@@ -207,7 +154,6 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
         initialCameraLensDirection: _cameraLensDirection,
         onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
       ),
-      poseInfo(),
       Positioned(
           bottom: 0.0, child: percent < 1.0 ? countText() : completeText()),
     ]));
