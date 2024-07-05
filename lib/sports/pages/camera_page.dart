@@ -187,18 +187,22 @@ class _CameraViewState extends State<CameraView> {
 
     setState(() {
       _isBusy = true;
+      poseFeedback = 'Analyzing pose...';
     });
 
     try {
       final image = await _controller!.takePicture();
       final imageBytes = await image.readAsBytes();
 
-      final feedback =
-          await _geminiService.analyzePose(Uint8List.fromList(imageBytes));
-      setState(() {
-        poseFeedback = feedback;
-      });
-      print('姿勢分析: $feedback');
+      final stream = _geminiService.analyzePose(Uint8List.fromList(imageBytes));
+
+      String fullFeedback = '';
+      await for (final feedback in stream) {
+        fullFeedback += feedback;
+        setState(() {
+          poseFeedback = fullFeedback;
+        });
+      }
     } catch (e) {
       print('拍攝圖像時出錯: $e');
       setState(() {

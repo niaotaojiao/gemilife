@@ -16,7 +16,7 @@ class GeminiService {
     _model = GenerativeModel(model: _modelName, apiKey: apiKey!);
   }
 
-  Future<String> analyzePose(Uint8List imageBytes) async {
+  Stream<String> analyzePose(Uint8List imageBytes) async* {
     try {
       _sessionImages.add(imageBytes);
 
@@ -35,11 +35,15 @@ class GeminiService {
         ])
       ];
 
-      final response = await _model.generateContent(content);
+      final response = _model.generateContentStream(content);
 
-      return response.text ?? 'No feedback generated';
+      await for (final chunk in response) {
+        if (chunk.text != null) {
+          yield chunk.text!;
+        }
+      }
     } catch (e) {
-      return 'Error analyzing pose: $e';
+      yield 'Error analyzing pose: $e';
     }
   }
 
