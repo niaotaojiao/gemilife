@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gemilife/sports/components/my_list_tile.dart';
+import 'package:gemilife/sports/widgets/my_list_tile.dart';
 
 class SportsListPage extends StatefulWidget {
   const SportsListPage({super.key});

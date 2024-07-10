@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gemilife/profile/components/my_card.dart';
+import 'package:gemilife/profile/widgets/my_card.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

@@ -5,7 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
-import 'package:gemilife/gemini_service.dart';
+import 'package:gemilife/core/services/gemini_service.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView(

@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gemilife/login/components/my_button.dart';
-import 'package:gemilife/login/components/my_textfield.dart';
-import 'package:gemilife/login/components/square_tile.dart';
+import 'package:gemilife/login/widgets/my_button.dart';
+import 'package:gemilife/login/widgets/my_textfield.dart';
+import 'package:gemilife/login/widgets/square_tile.dart';
 import 'package:gemilife/login/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {

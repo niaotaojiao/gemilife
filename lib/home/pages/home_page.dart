@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gemilife/home/components/calendar_widget.dart';
+import 'package:gemilife/home/widgets/calendar_widget.dart';
 import 'package:gemilife/home/pages/add_event_page.dart';
 import 'package:gemilife/home/pages/edit_event_page.dart';
 import 'package:gemilife/home/services/event.dart';
