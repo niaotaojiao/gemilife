@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gemilife/home/widgets/custom_slider.dart';
 
 class AddEvent extends StatefulWidget {
   final DateTime today;
@@ -108,6 +109,7 @@ class _AddEventState extends State<AddEvent> {
           const SizedBox(
             height: 20,
           ),
+          CustomSlider(),
           ElevatedButton(
             onPressed: () {
               _addEvent();
