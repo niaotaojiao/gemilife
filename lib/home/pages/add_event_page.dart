@@ -109,7 +109,44 @@ class _AddEventState extends State<AddEvent> {
           const SizedBox(
             height: 20,
           ),
-          CustomSlider(),
+          const Text('Engagement'),
+          const Row(
+            children: [
+              SizedBox(
+                  width: 30,
+                  child: Align(
+                      alignment: Alignment.centerLeft, child: Text('LO'))),
+              Expanded(
+                child: CustomSlider(),
+              ),
+              SizedBox(
+                  width: 30,
+                  child: Align(
+                      alignment: Alignment.centerRight, child: Text('HI'))),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          const Text('Energy'),
+          const Row(
+            children: [
+              SizedBox(
+                  width: 30,
+                  child: Align(
+                      alignment: Alignment.centerLeft, child: Text('NEG'))),
+              Expanded(
+                child: CustomSlider(),
+              ),
+              SizedBox(
+                  width: 30,
+                  child: Align(
+                      alignment: Alignment.centerRight, child: Text('POS'))),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
           ElevatedButton(
             onPressed: () {
               _addEvent();
