@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 
-class CustomSlider extends StatefulWidget {
-  const CustomSlider({super.key});
+class EngagementSlider extends StatefulWidget {
+  final double initValue;
+  final ValueChanged<double> onChanged;
+  const EngagementSlider(
+      {super.key, required this.initValue, required this.onChanged});
 
   @override
-  State<CustomSlider> createState() => _CustomSliderState();
+  State<EngagementSlider> createState() => _EngagementSliderState();
 }
 
-class _CustomSliderState extends State<CustomSlider> {
-  double _value = 3;
+class _EngagementSliderState extends State<EngagementSlider> {
+  late double _value;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.initValue;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SliderTheme(
@@ -36,6 +46,7 @@ class _CustomSliderState extends State<CustomSlider> {
           setState(() {
             _value = value;
           });
+          widget.onChanged(value);
         },
       ),
     );

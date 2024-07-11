@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gemilife/home/widgets/custom_slider.dart';
+import 'package:gemilife/home/widgets/energy_slider.dart';
+import 'package:gemilife/home/widgets/engagement_slider.dart';
 
 class AddEvent extends StatefulWidget {
   final DateTime today;
@@ -15,6 +16,8 @@ class _AddEventState extends State<AddEvent> {
   late DateTime _selectedDate;
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
+  double _engagementValue = 3;
+  double _energyValue = 0;
 
   void _addEvent() async {
     final title = _titleController.text;
@@ -110,16 +113,23 @@ class _AddEventState extends State<AddEvent> {
             height: 20,
           ),
           const Text('Engagement'),
-          const Row(
+          Row(
             children: [
-              SizedBox(
+              const SizedBox(
                   width: 30,
                   child: Align(
                       alignment: Alignment.centerLeft, child: Text('LO'))),
               Expanded(
-                child: CustomSlider(),
+                child: EngagementSlider(
+                  initValue: _engagementValue,
+                  onChanged: (value) {
+                    setState(() {
+                      _engagementValue = value;
+                    });
+                  },
+                ),
               ),
-              SizedBox(
+              const SizedBox(
                   width: 30,
                   child: Align(
                       alignment: Alignment.centerRight, child: Text('HI'))),
@@ -129,16 +139,23 @@ class _AddEventState extends State<AddEvent> {
             height: 20,
           ),
           const Text('Energy'),
-          const Row(
+          Row(
             children: [
-              SizedBox(
+              const SizedBox(
                   width: 30,
                   child: Align(
                       alignment: Alignment.centerLeft, child: Text('NEG'))),
               Expanded(
-                child: CustomSlider(),
+                child: EnergySlider(
+                  initValue: _energyValue,
+                  onChanged: (value) {
+                    setState(() {
+                      _energyValue = value;
+                    });
+                  },
+                ),
               ),
-              SizedBox(
+              const SizedBox(
                   width: 30,
                   child: Align(
                       alignment: Alignment.centerRight, child: Text('POS'))),
