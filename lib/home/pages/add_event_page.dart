@@ -50,6 +50,8 @@ class _AddEventState extends State<AddEvent> {
       "title": title,
       "description": description,
       "date": Timestamp.fromDate(_selectedDate),
+      "engagement": _engagementValue,
+      "energy": _energyValue,
     });
 
     await FirebaseFirestore.instance
