@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gemilife/review/pages/review.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'profile/pages/profile_page.dart';
@@ -20,6 +21,7 @@ class _MainPageState extends State<MainPage> {
     const Home(),
     const TimerPage(),
     const SportsListPage(),
+    const Review(),
     const ProfilePage(),
   ];
 
@@ -59,6 +61,13 @@ class _MainPageState extends State<MainPage> {
               GButton(
                 icon: Icons.sports_gymnastics,
                 text: 'Sports',
+                iconColor: Colors.white,
+                iconActiveColor: Colors.white,
+                textColor: Colors.white,
+              ),
+              GButton(
+                icon: Icons.assessment,
+                text: 'Review',
                 iconColor: Colors.white,
                 iconActiveColor: Colors.white,
                 textColor: Colors.white,
