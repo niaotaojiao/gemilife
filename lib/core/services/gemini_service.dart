@@ -16,6 +16,38 @@ class GeminiService {
     _model = GenerativeModel(model: _modelName, apiKey: apiKey!);
   }
 
+  Stream<String> generateReview(List<String> events) async* {
+    try {
+      final prompt = '''
+        Based on the following journal entries from the past week, provide a detailed weekly review. 
+        Include insights on personal development, productivity, emotional well-being, 
+        and any noticeable patterns or trends. Offer actionable suggestions for improvement 
+        and highlight any significant achievements or challenges.
+
+        ${events.join('\n')}
+      ''';
+
+      final content = [Content.text(prompt)];
+
+      final response = _model.generateContentStream(content);
+
+      await for (final chunk in response) {
+        if (chunk.text != null) {
+          yield chunk.text!;
+        }
+      }
+    } catch (e) {
+      yield 'Error Review: $e';
+    }
+  }
+
+  Future<String?> generateMeditationReview() async {
+    final prompt = '''''';
+    final content = [Content.text(prompt)];
+    final response = await _model.generateContent(content);
+    return response.text;
+  }
+
   Stream<String> analyzePose(Uint8List imageBytes) async* {
     try {
       _sessionImages.add(imageBytes);
