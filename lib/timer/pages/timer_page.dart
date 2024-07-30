@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gemilife/core/services/gemini_service.dart';
 import 'package:gemilife/timer/services/slogans_list.dart';
 import 'package:gemilife/timer/services/timer_button_state.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -18,18 +19,29 @@ class TimerPage extends StatefulWidget {
 
 class _TimerPageState extends State<TimerPage> {
   late Timer _timer;
+  final _feel = TextEditingController();
   Duration duration = const Duration(minutes: 5);
   TimerButtonState currentButtonState = TimerButtonState.start;
   bool isPlaying = false;
   String slogan = SlognsList().getSlogan();
   int percent = 300;
   AudioPlayer audioPlayer = AudioPlayer();
+  final GeminiService _geminiService = GeminiService();
 
   @override
   void dispose() {
     _timer.cancel();
     audioPlayer.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showEvaluationForm(context);
+    });
+    _geminiService.initialize();
   }
 
   // Extracted the formatDuration function for reuse
@@ -60,6 +72,15 @@ class _TimerPageState extends State<TimerPage> {
         .collection(currentUser!)
         .doc('account')
         .update({'time': FieldValue.increment(minutes)});
+    await FirebaseFirestore.instance
+        .collection(currentUser)
+        .doc('eventlist')
+        .collection('events')
+        .add({
+      "title": 'Meditation',
+      "description": _geminiService.generateMeditationReview(),
+      "date": DateTime.now()
+    });
   }
 
   // Extracted the _updateTimer function for reuse
@@ -88,6 +109,34 @@ class _TimerPageState extends State<TimerPage> {
 
   void pause() async {
     await audioPlayer.pause();
+  }
+
+  void _showEvaluationForm(BuildContext context) {
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) => Wrap(children: [
+              Container(
+                  padding: EdgeInsetsDirectional.only(
+                      start: 20, end: 20, bottom: 30, top: 10),
+                  child: SizedBox(
+                    height: 400,
+                    child: Column(
+                      children: [
+                        const Text('Self-Assessment'),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        TextField(
+                          controller: _feel,
+                          decoration: const InputDecoration(
+                            labelText: 'How do you feel right now?',
+                          ),
+                        )
+                      ],
+                    ),
+                  ))
+            ]));
   }
 
   @override
@@ -124,12 +173,14 @@ class _TimerPageState extends State<TimerPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 20),
             isPlaying ? const Text('') : Text(slogan),
-            //const SizedBox(height: 30),
-            // const Text('代辦: 這裡要做選背景音樂清單'),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showEvaluationForm(context),
+        child: const Icon(Icons.edit),
       ),
     );
   }
@@ -193,7 +244,7 @@ class _TimerPageState extends State<TimerPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Warning'),
-            content: const Text('Time cannot be less than five minutes!！'),
+            content: const Text('Time cannot be less than five minutes!'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
