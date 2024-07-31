@@ -20,9 +20,13 @@ class TimerPage extends StatefulWidget {
 class _TimerPageState extends State<TimerPage> {
   late Timer _timer;
   final _feel = TextEditingController();
+  String forwardFeel = '';
+  String endFeel = '';
+  final feelback = '';
   Duration duration = const Duration(minutes: 5);
   TimerButtonState currentButtonState = TimerButtonState.start;
   bool isPlaying = false;
+  bool isEndSubmit = false;
   String slogan = SlognsList().getSlogan();
   int percent = 300;
   AudioPlayer audioPlayer = AudioPlayer();
@@ -38,9 +42,10 @@ class _TimerPageState extends State<TimerPage> {
   @override
   void initState() {
     super.initState();
+    /*
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showEvaluationForm(context);
-    });
+    });*/
     _geminiService.initialize();
   }
 
@@ -72,13 +77,17 @@ class _TimerPageState extends State<TimerPage> {
         .collection(currentUser!)
         .doc('account')
         .update({'time': FieldValue.increment(minutes)});
+
+    String? review =
+        await _geminiService.generateMeditationReview(forwardFeel, endFeel);
+
     await FirebaseFirestore.instance
         .collection(currentUser)
         .doc('eventlist')
         .collection('events')
         .add({
       "title": 'Meditation',
-      "description": _geminiService.generateMeditationReview(),
+      "description": review,
       "date": DateTime.now()
     });
   }
@@ -91,7 +100,10 @@ class _TimerPageState extends State<TimerPage> {
       });
     } else {
       // Timer has reached zero
-      _addEvent();
+      isEndSubmit = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showEvaluationForm(context);
+      });
       _resetTimer();
       play();
     }
@@ -111,13 +123,33 @@ class _TimerPageState extends State<TimerPage> {
     await audioPlayer.pause();
   }
 
+  void forwardSubmit() {
+    setState(() {
+      forwardFeel = _feel.text;
+      print('FFFFFFFFFFlog!!!!!!:$_feel.text');
+    });
+  }
+
+  void endSubmit() {
+    print('EEEEEEEEElog!!!!!!:$_feel.text');
+    setState(() {
+      endFeel = _feel.text;
+    });
+    _addEvent();
+    isEndSubmit = false;
+  }
+
+  void forwardOrEndSubmit() {
+    isEndSubmit ? endSubmit() : forwardSubmit();
+  }
+
   void _showEvaluationForm(BuildContext context) {
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         builder: (BuildContext context) => Wrap(children: [
               Container(
-                  padding: EdgeInsetsDirectional.only(
+                  padding: const EdgeInsetsDirectional.only(
                       start: 20, end: 20, bottom: 30, top: 10),
                   child: SizedBox(
                     height: 400,
@@ -132,7 +164,16 @@ class _TimerPageState extends State<TimerPage> {
                           decoration: const InputDecoration(
                             labelText: 'How do you feel right now?',
                           ),
-                        )
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              forwardOrEndSubmit();
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Submit'))
                       ],
                     ),
                   ))
@@ -258,7 +299,11 @@ class _TimerPageState extends State<TimerPage> {
       );
     } else {
       setState(() {
-        if (currentButtonState == TimerButtonState.start) {
+        if (currentButtonState == TimerButtonState.start && forwardFeel == '') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _showEvaluationForm(context);
+          });
+        } else if (currentButtonState == TimerButtonState.start) {
           _timer = Timer.periodic(
             const Duration(seconds: 1),
             _updateTimer,

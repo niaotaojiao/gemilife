@@ -41,10 +41,18 @@ class GeminiService {
     }
   }
 
-  Future<String?> generateMeditationReview() async {
-    final prompt = '''''';
+  Future<String?> generateMeditationReview(
+      String forwardFeel, String endFeel) async {
+    final prompt = '''
+    Please provide a brief review based on the user's meditation session.
+      - Before meditation, the user felt: $forwardFeel.
+      - After meditation, the user felt: $endFeel.
+
+    Based on these feelings, generate an evaluation highlighting any notable changes, insights, or experiences the user might have had during the session. The review should be concise, around 200 words, and focus on how the meditation may have impacted the user's mental or emotional state.
+    ''';
     final content = [Content.text(prompt)];
     final response = await _model.generateContent(content);
+    print('Gemini log: ${response.text}!!!!!!!!!!!!!!!!!!');
     return response.text;
   }
 

@@ -114,6 +114,8 @@ class _HomeState extends State<Home> {
                           ),
                           subtitle: Text(
                             event.description!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           trailing:
                               Row(mainAxisSize: MainAxisSize.min, children: [
