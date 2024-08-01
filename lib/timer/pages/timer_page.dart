@@ -24,6 +24,7 @@ class _TimerPageState extends State<TimerPage> {
   String endFeel = '';
   final feelback = '';
   Duration duration = const Duration(minutes: 5);
+  int meditationDuration = 5;
   TimerButtonState currentButtonState = TimerButtonState.start;
   bool isPlaying = false;
   bool isEndSubmit = false;
@@ -90,6 +91,12 @@ class _TimerPageState extends State<TimerPage> {
       "description": review,
       "date": DateTime.now()
     });
+
+    await FirebaseFirestore.instance
+        .collection(currentUser)
+        .doc('eventlist')
+        .collection('meditation')
+        .add({"duration": meditationDuration, "date": DateTime.now()});
   }
 
   // Extracted the _updateTimer function for reuse
@@ -238,6 +245,7 @@ class _TimerPageState extends State<TimerPage> {
         onTimerDurationChanged: (newDuration) {
           if (mounted) {
             setState(() => duration = newDuration);
+            meditationDuration = duration.inMinutes;
             percent = duration.inSeconds;
           }
         },
@@ -270,6 +278,7 @@ class _TimerPageState extends State<TimerPage> {
     setState(() {
       _timer.cancel();
       duration = const Duration(minutes: 5);
+      meditationDuration = 5;
       percent = 300;
       currentButtonState = TimerButtonState.start;
       isPlaying = false;

@@ -15,6 +15,7 @@ class Review extends StatefulWidget {
 
 class _ReviewState extends State<Review> {
   List<Map<String, dynamic>> weeklyEntries = [];
+  Map<String, double> meditationData = {};
   String? summary;
   DateTime startDate = DateTime.now();
   DateTime endDate = DateTime.now();
@@ -70,13 +71,38 @@ class _ReviewState extends State<Review> {
         .get();
 
     if (reviewSnapshot.docs.isNotEmpty) {
-      // Review already exists, load it
       setState(() {
         summary = reviewSnapshot.docs.first['summary'];
       });
     } else {
       print('!!!!!!!!!!!!!!');
     }
+
+    final meditationSnapshot = await FirebaseFirestore.instance
+        .collection(currentUser)
+        .doc('eventlist')
+        .collection('meditation')
+        .where('date', isGreaterThanOrEqualTo: startDate)
+        .where('date', isLessThanOrEqualTo: endDate)
+        .get();
+
+    Map<String, double> data = {};
+
+    meditationSnapshot.docs.forEach((doc) {
+      DateTime date = doc['date'].toDate();
+      String formattedDate = DateFormat('MM/dd').format(date);
+      double duration = doc['duration'].toDouble();
+
+      if (data.containsKey(formattedDate)) {
+        data[formattedDate] = data[formattedDate]! + duration;
+      } else {
+        data[formattedDate] = duration;
+      }
+    });
+
+    setState(() {
+      meditationData = data;
+    });
   }
 
   Future<void> generateSuggestions() async {
@@ -102,6 +128,23 @@ class _ReviewState extends State<Review> {
     });
   }
 
+  List<BarChartGroupData> getBarChartData() {
+    List<BarChartGroupData> barChartData = [];
+    for (int i = 0; i < 7; i++) {
+      DateTime date = startDate.add(Duration(days: i));
+      String formattedDate = DateFormat('MM/dd').format(date);
+      double duration = meditationData[formattedDate] ?? 0.0;
+
+      barChartData.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [BarChartRodData(toY: duration, color: Colors.blue)],
+        ),
+      );
+    }
+    return barChartData;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,7 +153,7 @@ class _ReviewState extends State<Review> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -126,6 +169,8 @@ class _ReviewState extends State<Review> {
                     children: [
                       const Text(
                         'Weekly Summary',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -149,40 +194,43 @@ class _ReviewState extends State<Review> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Mood Trend',
+                        'Meditation Trend',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Container(
                         height: 200,
-                        child: LineChart(
-                          LineChartData(
-                              // TODO: Implement actual chart data
+                        child: BarChart(
+                          BarChartData(
+                            alignment: BarChartAlignment.spaceAround,
+                            barGroups: getBarChartData(),
+                            titlesData: FlTitlesData(
+                              topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false)),
+                              leftTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false)),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 40,
+                                  interval: 1,
+                                  getTitlesWidget: (value, meta) {
+                                    final date = startDate
+                                        .add(Duration(days: value.toInt()));
+                                    return SideTitleWidget(
+                                      axisSide: meta.axisSide,
+                                      child: Text(
+                                        DateFormat('EEE').format(date),
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Next Week\'s Goals'),
-                      SizedBox(height: 8),
-                      ListTile(
-                        leading: Icon(Icons.check_circle_outline),
-                        title: Text('Complete the Flutter app prototype'),
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.add_circle_outline),
-                        title: Text('Add a new goal'),
-                        onTap: () {
-                          // TODO: Implement add goal functionality
-                        },
                       ),
                     ],
                   ),
