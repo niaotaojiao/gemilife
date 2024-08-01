@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:gemilife/core/services/gemini_service.dart';
 import 'package:intl/intl.dart';
 
@@ -13,7 +14,7 @@ class Review extends StatefulWidget {
 }
 
 class _ReviewState extends State<Review> {
-  List<String> weeklyEntries = [];
+  List<Map<String, dynamic>> weeklyEntries = [];
   String? summary;
   DateTime startDate = DateTime.now();
   DateTime endDate = DateTime.now();
@@ -29,8 +30,12 @@ class _ReviewState extends State<Review> {
 
   void setWeekRange() {
     DateTime now = DateTime.now();
-    endDate = now.subtract(Duration(days: now.weekday)); // 上周日
-    startDate = endDate.subtract(Duration(days: 6)); // 上周一
+    endDate = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday))
+        .add(Duration(hours: 23, minutes: 59, seconds: 59));
+    startDate = endDate
+        .subtract(Duration(days: 6))
+        .subtract(Duration(hours: 23, minutes: 59, seconds: 59));
   }
 
   Future<void> fetchWeeklyEvants() async {
@@ -43,11 +48,35 @@ class _ReviewState extends State<Review> {
         .where('date', isLessThanOrEqualTo: endDate)
         .get();
 
-    List<String> entries =
-        snapshot.docs.map((doc) => doc['content'].toString()).toList();
+    List<Map<String, dynamic>> entries = snapshot.docs.map((doc) {
+      return {
+        'date': doc['date'],
+        'description': doc['description'],
+        'energy': doc['energy'],
+        'engagement': doc['engagement'],
+        'title': doc['title'],
+      };
+    }).toList();
     setState(() {
       weeklyEntries = entries;
     });
+
+    final reviewSnapshot = await FirebaseFirestore.instance
+        .collection(currentUser)
+        .doc('eventlist')
+        .collection('reviews')
+        .where('startDate', isEqualTo: Timestamp.fromDate(startDate))
+        .where('endDate', isEqualTo: Timestamp.fromDate(endDate))
+        .get();
+
+    if (reviewSnapshot.docs.isNotEmpty) {
+      // Review already exists, load it
+      setState(() {
+        summary = reviewSnapshot.docs.first['summary'];
+      });
+    } else {
+      print('!!!!!!!!!!!!!!');
+    }
   }
 
   Future<void> generateSuggestions() async {
@@ -67,8 +96,8 @@ class _ReviewState extends State<Review> {
         .doc('eventlist')
         .collection('reviews')
         .add({
-      'startDate': startDate,
-      'endDate': endDate,
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': Timestamp.fromDate(endDate),
       'summary': summary,
     });
   }
@@ -99,8 +128,11 @@ class _ReviewState extends State<Review> {
                         'Weekly Summary',
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        summary ?? 'Generating suggestions...',
+                      Container(
+                        constraints: BoxConstraints(maxHeight: 400),
+                        child: Markdown(
+                          data: summary ?? 'Generating suggestions...',
+                        ),
                       ),
                       IconButton(
                           onPressed: generateSuggestions,

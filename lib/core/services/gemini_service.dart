@@ -16,15 +16,25 @@ class GeminiService {
     _model = GenerativeModel(model: _modelName, apiKey: apiKey!);
   }
 
-  Stream<String> generateReview(List<String> events) async* {
+  Stream<String> generateReview(List<Map<String, dynamic>> events) async* {
     try {
+      final eventDescriptions = events.map((event) {
+        return '''
+      Date: ${event['date']}
+      Title: ${event['title']}
+      Description: ${event['description']}
+      Energy: ${event['energy']}
+      Engagement: ${event['engagement']}
+      ''';
+      }).join('\n\n');
       final prompt = '''
         Based on the following journal entries from the past week, provide a detailed weekly review. 
         Include insights on personal development, productivity, emotional well-being, 
         and any noticeable patterns or trends. Offer actionable suggestions for improvement 
         and highlight any significant achievements or challenges.
+        
 
-        ${events.join('\n')}
+        $eventDescriptions
       ''';
 
       final content = [Content.text(prompt)];
