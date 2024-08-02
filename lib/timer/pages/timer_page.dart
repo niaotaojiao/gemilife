@@ -190,12 +190,19 @@ class _TimerPageState extends State<TimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Card(child: Image.asset('assets/img/m.png')),
+            Card(
+                child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/img/meditation.png',
+              ),
+            )),
             isPlaying ? buildTimer() : buildTimePicker(),
             const SizedBox(height: 5),
             Row(

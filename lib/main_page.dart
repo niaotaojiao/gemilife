@@ -29,13 +29,14 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: _pages[_selectedIndex],
-        bottomNavigationBar: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15.0),
-            topRight: Radius.circular(15.0),
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Colors.grey, width: 0.5), // 分隔線
+            ),
           ),
           child: GNav(
-            backgroundColor: Colors.blue[900]!,
+            backgroundColor: Colors.white,
             selectedIndex: _selectedIndex,
             onTabChange: (index) {
               setState(() {
@@ -43,41 +44,28 @@ class _MainPageState extends State<MainPage> {
               });
             },
             gap: 8,
+            color: Colors.grey,
+            activeColor: Colors.black,
             tabs: const [
               GButton(
                 icon: Icons.home,
                 text: 'Home',
-                iconColor: Colors.white,
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.timer,
                 text: 'Timer',
-                iconColor: Colors.white,
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.sports_gymnastics,
                 text: 'Sports',
-                iconColor: Colors.white,
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.assessment,
                 text: 'Review',
-                iconColor: Colors.white,
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.person,
                 text: 'Profile',
-                iconColor: Colors.white,
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
               ),
             ],
           ),

@@ -22,8 +22,11 @@ class CalendarWidget extends StatelessWidget {
       focusedDay: today,
       firstDay: DateTime.utc(2002, 4, 30),
       lastDay: DateTime.utc(2100, 4, 30),
-      headerVisible: false,
       rowHeight: 43,
+      headerStyle: const HeaderStyle(
+          formatButtonVisible: false,
+          titleCentered: true,
+          titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       calendarStyle: const CalendarStyle(
         weekendTextStyle: TextStyle(
           color: Colors.red,

@@ -19,8 +19,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   DateTime _today = DateTime.now();
   DateTime? _selectedDay;
-  bool _eventsLoaded = false;
   late Map<DateTime, List<Event>> _events;
+  String username = 'Username';
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
@@ -51,6 +51,7 @@ class _HomeState extends State<Home> {
     _selectedDay = DateTime.utc(_today.year, _today.month, _today.day, 0);
     _events = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
     _loadFirestoreEvents();
+    getUserName();
   }
 
   _loadFirestoreEvents() async {
@@ -74,70 +75,143 @@ class _HomeState extends State<Home> {
       }
       _events[day]!.add(event);
     }
+    setState(() {});
+  }
+
+  void getUserName() async {
+    final currentUser = FirebaseAuth.instance.currentUser?.email;
+    final snap = await FirebaseFirestore.instance
+        .collection(currentUser!)
+        .doc('account')
+        .get();
+
     setState(() {
-      _eventsLoaded = true;
+      username = snap['username'];
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${_today.year.toString()}/${_today.month.toString()}/${_today.day.toString()}',
-          style: const TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blue[900],
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _eventsLoaded
-            ? ListView(
-                children: [
-                  CalendarWidget(
-                    today: _selectedDay!,
-                    onDaySelected: _onDaySelected,
-                    onPageChanged: _onPageChanged,
-                    getEventsForTheDay: _getEventsForTheDay,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+            padding: const EdgeInsets.only(
+              top: 16.0,
+              left: 16.0,
+              right: 16,
+            ),
+            child: ListView(
+              children: [
+                Text(
+                  'Welcome back! $username',
+                  style: const TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
-                  Divider(
-                    height: 2,
-                    color: Colors.red[100],
+                ),
+                const SizedBox(height: 8.0),
+                const Text(
+                  'Documenting your life, guided by Gemini insights.',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black54,
                   ),
-                  const SizedBox(height: 10),
-                  ..._getEventsForTheDay(_selectedDay!).map((event) => Card(
+                ),
+                const SizedBox(height: 16.0),
+                Card(
+                  color: Colors.orange[100],
+                  elevation: 2.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: CalendarWidget(
+                      today: _selectedDay!,
+                      onDaySelected: _onDaySelected,
+                      onPageChanged: _onPageChanged,
+                      getEventsForTheDay: _getEventsForTheDay,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset('assets/img/bot.png', width: 50, height: 50),
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    const Expanded(
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.zero,
+                            topRight: Radius.circular(12.0),
+                            bottomRight: Radius.circular(12.0),
+                            bottomLeft: Radius.circular(12.0),
+                          ),
+                        ),
+                        elevation: 2.0,
+                        child: Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Gemilife Assistant',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                Text(
+                                    'Start by adding new events to document your life.')
+                              ],
+                            )),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text('Your life today',
+                    style: TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87)),
+                const SizedBox(height: 16),
+                if (_events[_selectedDay] == null)
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    elevation: 2.0,
+                    child: const Padding(
+                        padding: EdgeInsets.all(12.0),
                         child: ListTile(
-                          title: Text(
-                            event.title,
-                          ),
+                          leading: Icon(Icons.edit_calendar),
+                          title: Text('No events for today',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text(
-                            event.description!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing:
-                              Row(mainAxisSize: MainAxisSize.min, children: [
-                            IconButton(
-                                onPressed: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => EditEvent(
-                                        event: event,
-                                        today: _selectedDay!,
-                                        title: event.title,
-                                        description: event.description,
-                                      ),
-                                    ),
-                                  );
-                                  if (result ?? false) {
-                                    _loadFirestoreEvents();
-                                  }
-                                },
-                                icon: const Icon(Icons.settings)),
-                            IconButton(
+                              'Start by adding new events to document your life.'),
+                        )),
+                  )
+                else
+                  ..._getEventsForTheDay(_selectedDay!).map((event) => Card(
+                        color: Colors.orange[100],
+                        elevation: 2.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: ListTile(
+                            leading: const Icon(Icons.album),
+                            title: Text(
+                              event.title,
+                            ),
+                            subtitle: Text(
+                              event.description!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: IconButton(
                                 onPressed: () async {
                                   final currentUser =
                                       FirebaseAuth.instance.currentUser?.email;
@@ -157,15 +231,30 @@ class _HomeState extends State<Home> {
                                   });
                                 },
                                 icon: const Icon(
-                                  Icons.delete,
+                                  Icons.close,
                                   color: Colors.red,
                                 )),
-                          ]),
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EditEvent(
+                                    event: event,
+                                    today: _selectedDay!,
+                                    title: event.title,
+                                    description: event.description,
+                                  ),
+                                ),
+                              );
+                              if (result ?? false) {
+                                _loadFirestoreEvents();
+                              }
+                            },
+                          ),
                         ),
                       )),
-                ],
-              )
-            : const Center(child: CircularProgressIndicator()),
+              ],
+            )),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue[900],
@@ -180,7 +269,7 @@ class _HomeState extends State<Home> {
             _loadFirestoreEvents();
           }
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.edit, color: Colors.white),
       ),
     );
   }

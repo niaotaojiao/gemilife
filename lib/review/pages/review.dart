@@ -151,6 +151,7 @@ class _ReviewState extends State<Review> {
       appBar: AppBar(
         title: const Text('Weekly Insights'),
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -179,9 +180,19 @@ class _ReviewState extends State<Review> {
                           data: summary ?? 'Generating suggestions...',
                         ),
                       ),
-                      IconButton(
-                          onPressed: generateSuggestions,
-                          icon: const Icon(Icons.add_alert))
+                      Row(
+                        children: [
+                          IconButton(
+                              onPressed: generateSuggestions,
+                              icon: const Icon(Icons.add_alert)),
+                          IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.thumb_up)),
+                          IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.thumb_down))
+                        ],
+                      )
                     ],
                   ),
                 ),

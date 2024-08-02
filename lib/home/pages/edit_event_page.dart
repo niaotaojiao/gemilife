@@ -74,7 +74,9 @@ class _EditEventState extends State<EditEvent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Event")),
+      appBar: AppBar(
+        title: const Text("Edit Event"),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
