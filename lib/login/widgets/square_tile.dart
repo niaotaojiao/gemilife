@@ -15,7 +15,7 @@ class SquareTile extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: Colors.white),
           borderRadius: BorderRadius.circular(16),
-          color: const Color.fromARGB(255, 236, 227, 190),
+          color: Colors.grey[200],
         ),
         child: Image.asset(
           imagePath,

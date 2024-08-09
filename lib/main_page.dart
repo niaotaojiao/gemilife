@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gemilife/review/pages/review.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'profile/pages/profile_page.dart';
 import 'home/pages/home_page.dart';
@@ -35,39 +34,40 @@ class _MainPageState extends State<MainPage> {
               top: BorderSide(color: Colors.grey, width: 0.5), // 分隔線
             ),
           ),
-          child: GNav(
-            backgroundColor: Colors.white,
-            selectedIndex: _selectedIndex,
-            onTabChange: (index) {
+          child: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                label: 'Home',
+                backgroundColor: Colors.white,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.timer_outlined),
+                label: 'Meditation',
+                backgroundColor: Colors.white,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.sports_gymnastics_outlined),
+                label: 'Sports',
+                backgroundColor: Colors.white,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assessment_outlined),
+                label: 'Review',
+                backgroundColor: Colors.white,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outlined),
+                label: 'Profile',
+                backgroundColor: Colors.white,
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            onTap: (index) {
               setState(() {
                 _selectedIndex = index;
               });
             },
-            gap: 8,
-            color: Colors.grey,
-            activeColor: Colors.black,
-            tabs: const [
-              GButton(
-                icon: Icons.home,
-                text: 'Home',
-              ),
-              GButton(
-                icon: Icons.timer,
-                text: 'Timer',
-              ),
-              GButton(
-                icon: Icons.sports_gymnastics,
-                text: 'Sports',
-              ),
-              GButton(
-                icon: Icons.assessment,
-                text: 'Review',
-              ),
-              GButton(
-                icon: Icons.person,
-                text: 'Profile',
-              ),
-            ],
           ),
         ));
   }

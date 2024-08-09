@@ -27,9 +27,17 @@ class CalendarWidget extends StatelessWidget {
           formatButtonVisible: false,
           titleCentered: true,
           titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-      calendarStyle: const CalendarStyle(
+      calendarStyle: CalendarStyle(
         weekendTextStyle: TextStyle(
-          color: Colors.red,
+          color: Colors.redAccent[700],
+        ),
+        selectedDecoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.amber[800],
+        ),
+        todayDecoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.orange[200],
         ),
       ),
       onDaySelected: onDaySelected,

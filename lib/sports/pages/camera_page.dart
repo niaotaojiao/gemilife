@@ -8,14 +8,15 @@ import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'package:gemilife/core/services/gemini_service.dart';
 
 class CameraView extends StatefulWidget {
-  const CameraView(
-      {super.key,
-      required this.customPaint,
-      required this.onImage,
-      this.onCameraFeedReady,
-      this.onDetectorViewModeChanged,
-      this.onCameraLensDirectionChanged,
-      this.initialCameraLensDirection = CameraLensDirection.back});
+  const CameraView({
+    super.key,
+    required this.customPaint,
+    required this.onImage,
+    this.onCameraFeedReady,
+    this.onDetectorViewModeChanged,
+    this.onCameraLensDirectionChanged,
+    this.initialCameraLensDirection = CameraLensDirection.back,
+  });
 
   final CustomPaint? customPaint;
   final Function(InputImage inputImage) onImage;
@@ -124,6 +125,7 @@ class _CameraViewState extends State<CameraView> {
             backgroundColor: Colors.black54,
             child: const Icon(
               Icons.arrow_back_ios_outlined,
+              color: Colors.white,
               size: 20,
             ),
           ),
@@ -131,8 +133,8 @@ class _CameraViewState extends State<CameraView> {
       );
 
   Widget _switchLiveCameraToggle() => Positioned(
-        bottom: 8,
-        right: 8,
+        top: 100,
+        left: 8,
         child: SizedBox(
           height: 50.0,
           width: 50.0,
@@ -145,6 +147,7 @@ class _CameraViewState extends State<CameraView> {
                   ? Icons.flip_camera_ios_outlined
                   : Icons.flip_camera_android_outlined,
               size: 25,
+              color: Colors.white,
             ),
           ),
         ),
@@ -156,9 +159,10 @@ class _CameraViewState extends State<CameraView> {
       right: 0,
       bottom: 0,
       child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+        padding: const EdgeInsets.all(16),
+        constraints: const BoxConstraints(minHeight: 120),
+        decoration: const BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
@@ -169,13 +173,26 @@ class _CameraViewState extends State<CameraView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Text(
-              poseFeedback,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Image.asset(
+                  'assets/img/ai-technology.png',
+                  height: 24,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    poseFeedback,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -204,7 +221,7 @@ class _CameraViewState extends State<CameraView> {
         });
       }
     } catch (e) {
-      print('拍攝圖像時出錯: $e');
+      print('erroer: $e');
       setState(() {
         poseFeedback = "An error occurred during analysis, please try again";
       });

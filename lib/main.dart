@@ -18,10 +18,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Gemilife',
       debugShowCheckedModeBanner: false,
-      home: AuthPage(),
+      theme: ThemeData(
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Colors.black87,
+          unselectedItemColor: Colors.grey,
+          showUnselectedLabels: true,
+        ),
+        cardTheme: const CardTheme(
+          color: Colors.white,
+          elevation: 2,
+        ),
+      ),
+      home: const AuthPage(),
     );
   }
 }

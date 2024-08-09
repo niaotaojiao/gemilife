@@ -1,7 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:gemilife/sports/pages/camera_page.dart';
@@ -79,8 +78,9 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: LinearPercentIndicator(
-        lineHeight: 14.0,
+        lineHeight: 20.0,
         percent: _getPercent(),
+        barRadius: const Radius.circular(16),
         backgroundColor: Colors.grey,
         progressColor: Colors.blue,
       ),
@@ -90,7 +90,14 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
   Widget completeText() {
     return Container(
       width: MediaQuery.of(context).size.width,
-      color: Colors.green,
+      constraints: const BoxConstraints(minHeight: 120),
+      decoration: const BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
       child: Column(
         children: [
           const Text(
@@ -155,7 +162,7 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
         onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
       ),
       Positioned(
-          bottom: 0.0, child: percent < 1.0 ? countText() : completeText()),
+          bottom: 8.0, child: percent < 1.0 ? countText() : completeText()),
     ]));
   }
 }

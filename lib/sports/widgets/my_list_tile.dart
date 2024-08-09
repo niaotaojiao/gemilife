@@ -16,26 +16,41 @@ class MyListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Image.asset(imgPath),
-        title: Text(name),
-        trailing: const Icon(
-          Icons.chevron_right,
+    return Column(
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListTile(
+              leading: Image.asset(imgPath),
+              title: Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              trailing: const Icon(
+                Icons.chevron_right,
+                size: 40,
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => sportOrYoga
+                            ? PoseDetectorPage(
+                                name: name,
+                              )
+                            : YogaDetectorPage(
+                                name: name,
+                              )));
+              },
+            ),
+          ),
         ),
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => sportOrYoga
-                      ? PoseDetectorPage(
-                          name: name,
-                        )
-                      : YogaDetectorPage(
-                          name: name,
-                        )));
-        },
-      ),
+        const SizedBox(height: 8),
+      ],
     );
   }
 }

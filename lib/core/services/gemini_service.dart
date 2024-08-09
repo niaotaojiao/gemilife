@@ -71,11 +71,11 @@ class GeminiService {
       _sessionImages.add(imageBytes);
 
       const prompt = '''
-        As a yoga instructor, analyze this yoga pose image and provide brief feedback:
-        1. Identify the pose
-        2. Assess the pose accuracy
-        3. Suggest one key improvement, if necessary
-        Keep the response concise, focusing on the most important point.
+        As a yoga instructor, analyze the following yoga pose image and provide brief feedback:
+        1. Identify the pose from the following options: Tree pose, Warrior-1, Warrior-2, Push-up, Sit-up or Squat.
+        2. Assess the accuracy of the pose based on standard alignment and form for the identified pose.
+        3. Suggest one key improvement to enhance the accuracy, if necessary.
+        Keep your response concise and focused on the most important feedback for improving the pose.
       ''';
 
       final content = [
@@ -97,7 +97,7 @@ class GeminiService {
     }
   }
 
-  Future<String> generateSessionSummary() async {
+  Future<String> generateSessionReview() async {
     if (_sessionImages.isEmpty) {
       return 'No yoga session data available.';
     }

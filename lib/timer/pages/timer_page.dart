@@ -23,6 +23,7 @@ class _TimerPageState extends State<TimerPage> {
   String forwardFeel = '';
   String endFeel = '';
   final feelback = '';
+  String? review;
   Duration duration = const Duration(minutes: 5);
   int meditationDuration = 5;
   TimerButtonState currentButtonState = TimerButtonState.start;
@@ -71,6 +72,10 @@ class _TimerPageState extends State<TimerPage> {
     }
   }
 
+  Color? _getButtonColor(TimerButtonState state) {
+    return state == TimerButtonState.pause ? Colors.yellow[700] : Colors.green;
+  }
+
   void _addEvent() async {
     final currentUser = FirebaseAuth.instance.currentUser?.email;
     int minutes = percent ~/ 60;
@@ -79,7 +84,7 @@ class _TimerPageState extends State<TimerPage> {
         .doc('account')
         .update({'time': FieldValue.increment(minutes)});
 
-    String? review =
+    review =
         await _geminiService.generateMeditationReview(forwardFeel, endFeel);
 
     await FirebaseFirestore.instance
@@ -97,13 +102,17 @@ class _TimerPageState extends State<TimerPage> {
         .doc('eventlist')
         .collection('meditation')
         .add({"duration": meditationDuration, "date": DateTime.now()});
+
+    if (review != null) {
+      _showMeditationSummery(context);
+    }
   }
 
   // Extracted the _updateTimer function for reuse
   void _updateTimer(Timer timer) {
     if (duration.inSeconds > 0) {
       setState(() {
-        duration = duration - const Duration(seconds: 1);
+        duration = duration - const Duration(seconds: 100);
       });
     } else {
       // Timer has reached zero
@@ -133,12 +142,10 @@ class _TimerPageState extends State<TimerPage> {
   void forwardSubmit() {
     setState(() {
       forwardFeel = _feel.text;
-      print('FFFFFFFFFFlog!!!!!!:$_feel.text');
     });
   }
 
   void endSubmit() {
-    print('EEEEEEEEElog!!!!!!:$_feel.text');
     setState(() {
       endFeel = _feel.text;
     });
@@ -150,8 +157,63 @@ class _TimerPageState extends State<TimerPage> {
     isEndSubmit ? endSubmit() : forwardSubmit();
   }
 
+  void _showMeditationSummery(BuildContext context) {
+    showModalBottomSheet(
+        backgroundColor: Colors.white,
+        isScrollControlled: true,
+        context: context,
+        builder: (BuildContext context) => Wrap(children: [
+              Container(
+                  padding: const EdgeInsetsDirectional.only(
+                      start: 20, end: 20, bottom: 30, top: 30),
+                  child: SizedBox(
+                    height: 400,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Summery',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Text(
+                            review ?? 'No review available.',
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                forwardOrEndSubmit();
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.amber[800],
+                              ),
+                              child: const Text(
+                                'Done',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ))
+                        ],
+                      ),
+                    ),
+                  ))
+            ]));
+  }
+
   void _showEvaluationForm(BuildContext context) {
     showModalBottomSheet(
+        backgroundColor: Colors.white,
         isScrollControlled: true,
         context: context,
         builder: (BuildContext context) => Wrap(children: [
@@ -162,7 +224,13 @@ class _TimerPageState extends State<TimerPage> {
                     height: 400,
                     child: Column(
                       children: [
-                        const Text('Self-Assessment'),
+                        const Text(
+                          'Self-Assessment',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(
                           height: 16,
                         ),
@@ -172,15 +240,19 @@ class _TimerPageState extends State<TimerPage> {
                             labelText: 'How do you feel right now?',
                           ),
                         ),
-                        const SizedBox(
-                          height: 16,
-                        ),
+                        const SizedBox(height: 16),
                         ElevatedButton(
                             onPressed: () {
                               forwardOrEndSubmit();
                               Navigator.pop(context);
                             },
-                            child: const Text('Submit'))
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber[800],
+                            ),
+                            child: const Text('Submit',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ))),
                       ],
                     ),
                   ))
@@ -190,54 +262,85 @@ class _TimerPageState extends State<TimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Card(
-                child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/img/meditation.png',
-              ),
-            )),
-            isPlaying ? buildTimer() : buildTimePicker(),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[300],
-                    minimumSize: const Size(100, 50),
-                  ),
-                  onPressed: () => _resetTimer(),
-                  child:
-                      Text('Cancel', style: TextStyle(color: Colors.blue[900])),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        children: [
+                          TextSpan(text: 'Begin Your\n'),
+                          TextSpan(text: 'Meditation Journey'),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () => _showEvaluationForm(context),
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          size: 32,
+                        ))
+                  ],
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[300],
-                    minimumSize: const Size(100, 50),
+                const SizedBox(height: 16),
+                Card(
+                    child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/img/meditation.png',
                   ),
-                  onPressed: () => _toggleTimer(),
-                  child: Text(_getButtonLabel(currentButtonState),
-                      style: TextStyle(color: Colors.blue[900])),
+                )),
+                const SizedBox(height: 16),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    isPlaying ? buildTimer() : buildTimePicker(),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[800],
+                            minimumSize: const Size(120, 50),
+                          ),
+                          onPressed: () => _resetTimer(),
+                          child: const Text('Cancel',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18)),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                _getButtonColor(currentButtonState),
+                            minimumSize: const Size(120, 50),
+                          ),
+                          onPressed: () => _toggleTimer(),
+                          child: Text(_getButtonLabel(currentButtonState),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 18)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Text(slogan),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            isPlaying ? const Text('') : Text(slogan),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showEvaluationForm(context),
-        child: const Icon(Icons.edit),
-      ),
-    );
+          ),
+        ));
   }
 
   // Extracted the buildTimePicker function for reuse
@@ -246,7 +349,7 @@ class _TimerPageState extends State<TimerPage> {
       height: 300,
       child: CupertinoTimerPicker(
         initialTimerDuration: duration,
-        mode: CupertinoTimerPickerMode.ms,
+        mode: CupertinoTimerPickerMode.hms,
         minuteInterval: 5,
         secondInterval: 1,
         onTimerDurationChanged: (newDuration) {

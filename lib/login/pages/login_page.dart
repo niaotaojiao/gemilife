@@ -62,16 +62,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 240, 202),
+      backgroundColor: const Color(0xFFF5F8FD),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
-
-                Image.asset('assets/img/logo.png', width: 100),
+                Image.asset('assets/img/logo.png', width: 200),
 
                 const SizedBox(height: 20),
 

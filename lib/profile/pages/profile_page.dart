@@ -46,12 +46,12 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView(children: [
+      backgroundColor: Colors.white,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              children: [
+                ListView(children: [
                   Card(
                     color: Colors.blue[900],
                     child: Column(
@@ -148,8 +148,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       currentCont: activityCount,
                       targetCont: 100),
                 ]),
-        ),
-      ),
+              ],
+            ),
     );
   }
 }
