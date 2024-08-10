@@ -75,7 +75,11 @@ class _AddEventState extends State<AddEvent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Event")),
+      appBar: AppBar(
+        title: const Text("ADD Event"),
+        backgroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.white,
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -170,7 +174,13 @@ class _AddEventState extends State<AddEvent> {
             onPressed: () {
               _addEvent();
             },
-            child: const Text("Add"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber[800],
+            ),
+            child: const Text(
+              "ADD",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

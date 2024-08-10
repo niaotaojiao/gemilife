@@ -76,7 +76,9 @@ class _EditEventState extends State<EditEvent> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Event"),
+        backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -119,8 +121,12 @@ class _EditEventState extends State<EditEvent> {
             onPressed: () {
               _editEvent();
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber[800],
+            ),
             child: const Text(
               "Save",
+              style: TextStyle(color: Colors.white),
             ),
           )
         ],

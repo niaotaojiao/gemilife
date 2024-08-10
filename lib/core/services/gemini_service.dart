@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:gemilife/home/services/event.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -14,6 +15,29 @@ class GeminiService {
       throw Exception('No \$GEMINI_API_KEY environment variable');
     }
     _model = GenerativeModel(model: _modelName, apiKey: apiKey!);
+  }
+
+  Stream<String> generateShortFeedback(List<Event> events) async* {
+    try {
+      final String journalEntries =
+          events.map((e) => "${e.title}: ${e.description ?? ''}").join('\n');
+      final prompt = '''
+        Here are today's journal entries: $journalEntries.
+        Based on these, provide brief feedback in 10 words or less.
+      ''';
+
+      final content = [Content.text(prompt)];
+
+      final response = _model.generateContentStream(content);
+
+      await for (final chunk in response) {
+        if (chunk.text != null) {
+          yield chunk.text!;
+        }
+      }
+    } catch (e) {
+      yield 'Error Review: $e';
+    }
   }
 
   Stream<String> generateReview(List<Map<String, dynamic>> events) async* {
@@ -66,16 +90,17 @@ class GeminiService {
     return response.text;
   }
 
-  Stream<String> analyzePose(Uint8List imageBytes) async* {
+  Stream<String> analyzePose(Uint8List imageBytes, String poseName) async* {
     try {
       _sessionImages.add(imageBytes);
 
-      const prompt = '''
-        As a yoga instructor, analyze the following yoga pose image and provide brief feedback:
-        1. Identify the pose from the following options: Tree pose, Warrior-1, Warrior-2, Push-up, Sit-up or Squat.
-        2. Assess the accuracy of the pose based on standard alignment and form for the identified pose.
-        3. Suggest one key improvement to enhance the accuracy, if necessary.
-        Keep your response concise and focused on the most important feedback for improving the pose.
+      final prompt = '''
+        Act as a fitness coach analyzing this $poseName pose image:
+        1. Accuracy: Is the pose correct? (Yes/Slightly off/No)
+        2. Key observation: What's the most notable aspect (good or needs improvement)?
+        3. Quick tip: One short, specific correction or encouragement (max 10 words).
+        Keep the entire response within 20 words. Focus on clarity and brevity.
+        Avoid any Markdown formatting in your response.
       ''';
 
       final content = [

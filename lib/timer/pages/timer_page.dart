@@ -112,7 +112,7 @@ class _TimerPageState extends State<TimerPage> {
   void _updateTimer(Timer timer) {
     if (duration.inSeconds > 0) {
       setState(() {
-        duration = duration - const Duration(seconds: 100);
+        duration = duration - const Duration(seconds: 1);
       });
     } else {
       // Timer has reached zero
@@ -244,6 +244,9 @@ class _TimerPageState extends State<TimerPage> {
                         ElevatedButton(
                             onPressed: () {
                               forwardOrEndSubmit();
+                              setState(() {
+                                _feel.text = ' ';
+                              });
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(

@@ -62,18 +62,23 @@ class _ReviewState extends State<Review> {
         .get();
 
     List<Map<String, dynamic>> entries = snapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
       return {
         'date': doc['date'],
         'description': doc['description'],
-        'energy': doc['energy'],
-        'engagement': doc['engagement'],
+        'energy': data.containsKey('energy') ? doc['energy'] : 'No energy data',
+        'engagement': data.containsKey('engagement')
+            ? data['engagement']
+            : 'No engagement data',
         'title': doc['title'],
       };
     }).toList();
 
-    setState(() {
-      weeklyEntries = entries;
-    });
+    if (mounted) {
+      setState(() {
+        weeklyEntries = entries;
+      });
+    }
 
     final reviewSnapshot = await FirebaseFirestore.instance
         .collection(currentUser)
@@ -120,6 +125,9 @@ class _ReviewState extends State<Review> {
   Future<void> generateSuggestions() async {
     if (weeklyEntries.isEmpty) return;
     final stream = _geminiService.generateReview(weeklyEntries);
+    setState(() {
+      _isExpanded = true;
+    });
     String fullFeedback = '';
     await for (final feedback in stream) {
       fullFeedback += feedback;
@@ -127,9 +135,6 @@ class _ReviewState extends State<Review> {
         summary = fullFeedback;
       });
     }
-    setState(() {
-      _isExpanded = true;
-    });
 
     final currentUser = FirebaseAuth.instance.currentUser?.email;
     await FirebaseFirestore.instance
@@ -227,12 +232,12 @@ class _ReviewState extends State<Review> {
                                   generateSuggestions();
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber,
+                                  backgroundColor: Colors.amber[800],
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Generation report',
                                   style: TextStyle(
-                                    color: Colors.grey[800],
+                                    color: Colors.white,
                                     fontSize: 16,
                                   ),
                                 )),
@@ -250,38 +255,46 @@ class _ReviewState extends State<Review> {
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      height: 250,
-                      child: BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          barGroups: getBarChartData(),
-                          titlesData: FlTitlesData(
-                            topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
-                            leftTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 40,
-                                interval: 1,
-                                getTitlesWidget: (value, meta) {
-                                  final date = startDate
-                                      .add(Duration(days: value.toInt()));
-                                  return SideTitleWidget(
-                                    axisSide: meta.axisSide,
-                                    child: Text(
-                                      DateFormat('EEE').format(date),
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  );
-                                },
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 250,
+                          child: BarChart(
+                            BarChartData(
+                              alignment: BarChartAlignment.spaceAround,
+                              barGroups: getBarChartData(),
+                              titlesData: FlTitlesData(
+                                topTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)),
+                                leftTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)),
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 40,
+                                    interval: 1,
+                                    getTitlesWidget: (value, meta) {
+                                      final date = startDate
+                                          .add(Duration(days: value.toInt()));
+                                      return SideTitleWidget(
+                                        axisSide: meta.axisSide,
+                                        child: Text(
+                                          DateFormat('EEE').format(date),
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [Text('(min)')],
+                        )
+                      ],
                     ),
                   ),
                 ),

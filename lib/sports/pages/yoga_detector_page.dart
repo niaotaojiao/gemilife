@@ -51,15 +51,15 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
   }
 
   void _addEvent() async {
-    final DateTime now = DateTime.now();
     final currentUser = FirebaseAuth.instance.currentUser?.email;
     await FirebaseFirestore.instance
         .collection(currentUser!)
         .doc('eventlist')
-        .collection('sports')
+        .collection('events')
         .add({
-      "name": widget.name,
-      "date": DateTime(now.year, now.month, now.day),
+      "title": 'Sport: ${widget.name}',
+      "description": '${widget.name} completed today',
+      "date": DateTime.now()
     });
 
     await FirebaseFirestore.instance
@@ -75,14 +75,17 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
   }
 
   Widget countText() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: LinearPercentIndicator(
-        lineHeight: 20.0,
-        percent: _getPercent(),
-        barRadius: const Radius.circular(16),
-        backgroundColor: Colors.grey,
-        progressColor: Colors.blue,
+    return Positioned(
+      bottom: 8.0,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: LinearPercentIndicator(
+          lineHeight: 20.0,
+          percent: _getPercent(),
+          barRadius: const Radius.circular(16),
+          backgroundColor: Colors.grey,
+          progressColor: Colors.blue,
+        ),
       ),
     );
   }
@@ -90,7 +93,7 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
   Widget completeText() {
     return Container(
       width: MediaQuery.of(context).size.width,
-      constraints: const BoxConstraints(minHeight: 120),
+      constraints: const BoxConstraints(minHeight: 200),
       decoration: const BoxDecoration(
         color: Colors.green,
         borderRadius: BorderRadius.only(
@@ -158,11 +161,12 @@ class _YogaDetectorPageState extends State<YogaDetectorPage> {
       CameraView(
         customPaint: _customPaint,
         onImage: _processImage,
+        poseName: widget.name,
         initialCameraLensDirection: _cameraLensDirection,
         onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
       ),
       Positioned(
-          bottom: 8.0, child: percent < 1.0 ? countText() : completeText()),
+          bottom: 0.0, child: percent < 1.0 ? countText() : completeText()),
     ]));
   }
 }

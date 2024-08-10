@@ -115,7 +115,7 @@ bool squat(List<Pose> poses, bool poseState) {
   return poseState;
 }
 
-List<bool> warriorPose1(List<Pose> poses) {
+List<bool> warriorPose2(List<Pose> poses) {
   initYogaPoseState();
   try {
     final leftElbowAngle = angle(
@@ -181,7 +181,7 @@ List<bool> warriorPose1(List<Pose> poses) {
   return yogaPoseState;
 }
 
-List<bool> warriorPose2(List<Pose> poses) {
+List<bool> warriorPose1(List<Pose> poses) {
   initYogaPoseState();
   try {
     final leftElbowAngle = angle(

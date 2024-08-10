@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gemilife/core/services/gemini_service.dart';
 import 'package:gemilife/home/widgets/calendar_widget.dart';
 import 'package:gemilife/home/pages/add_event_page.dart';
 import 'package:gemilife/home/pages/edit_event_page.dart';
@@ -21,6 +22,9 @@ class _HomeState extends State<Home> {
   DateTime? _selectedDay;
   late Map<DateTime, List<Event>> _events;
   String username = 'Username';
+  String assistantFeedback =
+      'Start by adding new events to document your life.';
+  final GeminiService _geminiService = GeminiService();
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
@@ -52,6 +56,7 @@ class _HomeState extends State<Home> {
     _events = LinkedHashMap(equals: isSameDay, hashCode: _getHashCode);
     _loadFirestoreEvents();
     getUserName();
+    _geminiService.initialize();
   }
 
   _loadFirestoreEvents() async {
@@ -75,6 +80,7 @@ class _HomeState extends State<Home> {
       }
       _events[day]!.add(event);
     }
+    gemilifeAssistantFeedback();
     setState(() {});
   }
 
@@ -88,6 +94,25 @@ class _HomeState extends State<Home> {
     setState(() {
       username = snap['username'];
     });
+  }
+
+  void gemilifeAssistantFeedback() async {
+    try {
+      final stream =
+          _geminiService.generateShortFeedback(_events[_selectedDay] ?? []);
+
+      String fullFeedback = '';
+      await for (final feedback in stream) {
+        fullFeedback += feedback;
+        setState(() {
+          assistantFeedback = fullFeedback;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        assistantFeedback = 'Start by adding new events to document your life.';
+      });
+    }
   }
 
   @override
@@ -127,7 +152,7 @@ class _HomeState extends State<Home> {
                                   color: Colors.black,
                                 ),
                               ),
-                              Icon(Icons.settings_outlined)
+                              const Icon(Icons.settings_outlined)
                             ],
                           ),
                           const SizedBox(height: 20.0),
@@ -174,23 +199,24 @@ class _HomeState extends State<Home> {
                                 fontSize: 24.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87)),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.edit_outlined,
-                            size: 28,
-                          ),
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => AddEvent(
-                                          today: _today,
-                                        )));
-                            if (result ?? false) {
-                              _loadFirestoreEvents();
-                            }
-                          },
-                        )
+                        TextButton.icon(
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => AddEvent(
+                                            today: _today,
+                                          )));
+                              if (result ?? false) {
+                                _loadFirestoreEvents();
+                              }
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text(
+                              'ADD',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w600),
+                            )),
                       ],
                     ),
                     if (_events[_selectedDay] == null)
@@ -212,9 +238,9 @@ class _HomeState extends State<Home> {
                       ..._getEventsForTheDay(_selectedDay!).map((event) => Card(
                             elevation: 2.0,
                             child: ListTile(
-                              leading: const Icon(
+                              leading: Icon(
                                 Icons.album,
-                                color: Colors.deepOrange,
+                                color: Colors.amber[800],
                                 size: 40,
                               ),
                               title: Text(
@@ -277,9 +303,9 @@ class _HomeState extends State<Home> {
                         const SizedBox(
                           width: 12,
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Card(
-                            shape: RoundedRectangleBorder(
+                            shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.zero,
                                 topRight: Radius.circular(12.0),
@@ -289,18 +315,19 @@ class _HomeState extends State<Home> {
                             ),
                             elevation: 2.0,
                             child: Padding(
-                                padding: EdgeInsets.all(12.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       'Gemilife Assistant',
                                       style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    Text(
-                                        'Start by adding new events to document your life.')
+                                    Text(_events[_selectedDay] == null
+                                        ? 'Start by adding new events to document your life.'
+                                        : assistantFeedback)
                                   ],
                                 )),
                           ),

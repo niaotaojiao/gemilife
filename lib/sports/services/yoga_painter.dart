@@ -23,12 +23,12 @@ class YogaPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final initPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
+      ..strokeWidth = 4.0
       ..color = Colors.redAccent;
 
     final rightPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
+      ..strokeWidth = 4.0
       ..color = Colors.green;
 
     for (final pose in poses) {
@@ -200,7 +200,7 @@ class YogaPainter extends CustomPainter {
           PoseLandmarkType.rightHip, PoseLandmarkType.rightKnee, initPaint);
       paintLine(
           PoseLandmarkType.rightKnee, PoseLandmarkType.rightAnkle, initPaint);
-          */
+  */
     }
   }
 

@@ -108,6 +108,7 @@ class _PoseDetectorPageState extends State<PoseDetectorPage> {
         CameraView(
           customPaint: _customPaint,
           onImage: _processImage,
+          poseName: widget.name,
           initialCameraLensDirection: _cameraLensDirection,
           onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
         ),

@@ -23,18 +23,18 @@ class _EngagementSliderState extends State<EngagementSlider> {
   Widget build(BuildContext context) {
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
-        activeTrackColor: Colors.red[700],
-        inactiveTrackColor: Colors.red[100],
+        activeTrackColor: Colors.amber[700],
+        inactiveTrackColor: Colors.amber[100],
         trackHeight: 12.0,
-        thumbColor: Colors.redAccent,
-        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
-        valueIndicatorColor: Colors.red,
+        thumbColor: Colors.amber,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12.0),
+        valueIndicatorColor: Colors.amber,
         valueIndicatorTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 18,
         ),
         overlayColor: Colors.red.withAlpha(32),
-        overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 28.0),
       ),
       child: Slider(
         min: 1,

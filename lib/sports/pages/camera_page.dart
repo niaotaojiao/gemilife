@@ -12,6 +12,7 @@ class CameraView extends StatefulWidget {
     super.key,
     required this.customPaint,
     required this.onImage,
+    required this.poseName,
     this.onCameraFeedReady,
     this.onDetectorViewModeChanged,
     this.onCameraLensDirectionChanged,
@@ -20,6 +21,7 @@ class CameraView extends StatefulWidget {
 
   final CustomPaint? customPaint;
   final Function(InputImage inputImage) onImage;
+  final String poseName;
   final VoidCallback? onCameraFeedReady;
   final VoidCallback? onDetectorViewModeChanged;
   final Function(CameraLensDirection direction)? onCameraLensDirectionChanged;
@@ -211,7 +213,8 @@ class _CameraViewState extends State<CameraView> {
       final image = await _controller!.takePicture();
       final imageBytes = await image.readAsBytes();
 
-      final stream = _geminiService.analyzePose(Uint8List.fromList(imageBytes));
+      final stream = _geminiService.analyzePose(
+          Uint8List.fromList(imageBytes), widget.poseName);
 
       String fullFeedback = '';
       await for (final feedback in stream) {
@@ -233,10 +236,14 @@ class _CameraViewState extends State<CameraView> {
   }
 
   void _startTimer() {
-    Timer.periodic(const Duration(seconds: 15), (timer) {
-      if (!_isBusy) {
-        _captureAndAnalyze();
-      }
+    Timer(const Duration(seconds: 5), () {
+      _captureAndAnalyze();
+      // 後續每隔 12 秒執行一次
+      Timer.periodic(const Duration(seconds: 10), (timer) {
+        if (!_isBusy) {
+          _captureAndAnalyze();
+        }
+      });
     });
   }
 
