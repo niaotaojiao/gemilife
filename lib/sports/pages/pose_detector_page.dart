@@ -48,6 +48,16 @@ class _PoseDetectorPageState extends State<PoseDetectorPage> {
     });
 
     await FirebaseFirestore.instance
+        .collection(currentUser!)
+        .doc('eventlist')
+        .collection('events')
+        .add({
+      "title": 'Sport: ${widget.name}',
+      "description": '${widget.name} completed today',
+      "date": DateTime.now()
+    });
+
+    await FirebaseFirestore.instance
         .collection(currentUser)
         .doc('account')
         .update({
@@ -78,7 +88,14 @@ class _PoseDetectorPageState extends State<PoseDetectorPage> {
   Widget completeText() {
     return Container(
       width: MediaQuery.of(context).size.width,
-      color: Colors.green,
+      constraints: const BoxConstraints(minHeight: 200),
+      decoration: const BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
       child: Column(
         children: [
           const Text(
